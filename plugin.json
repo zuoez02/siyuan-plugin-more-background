@@ -2,7 +2,7 @@
     "name": "siyuan-plugin-more-background",
     "author": "zuoez02",
     "url": "https://github.com/zuoez02/siyuan-plugin-more-background",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "displayName": {
         "default": "随机题头图",
         "zh_CN": "随机题头图"

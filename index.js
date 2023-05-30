@@ -15,8 +15,18 @@ module.exports = class MoreBackgroundPlugin extends Plugin {
 
         this.types = [
             { label: 'ACG', url: 'https://img.xjh.me/random_img.php?return=302' },
-            { label: 'unsplash', url: 'https://source.unsplash.com/random' }
         ];
+
+        this.loadStorage();
+    }
+
+    async loadStorage() {
+        const data = await this.loadData('settings');
+        if (!data) {
+            this.saveData('settings', JSON.stringify(this.types));
+        } else {
+            this.types = JSON.parse(data);
+        }
     }
 
     showThemesMenu(c) {
