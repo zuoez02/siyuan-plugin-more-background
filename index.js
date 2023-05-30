@@ -25,11 +25,12 @@ module.exports = class MoreBackgroundPlugin extends Plugin {
         if (!data) {
             this.saveData('settings', JSON.stringify(this.types));
         } else {
-            this.types = JSON.parse(data);
+            this.types = typeof data === 'string' ? JSON.parse(data) : data;
         }
     }
 
     showThemesMenu(c) {
+        console.log(this.types)
         const e = new Menu('MoreBackground');
         this.types.forEach((t) => {
             e.addItem({
