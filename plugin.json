@@ -1,15 +1,15 @@
 {
     "name": "siyuan-plugin-more-background",
     "author": "zuoez02",
-    "url": "https://github.com/zuoez02/siyuan-plugin--more-background",
-    "version": "0.1.2",
+    "url": "https://github.com/zuoez02/siyuan-plugin-more-background",
+    "version": "0.1.0",
     "displayName": {
         "default": "随机题头图",
         "zh_CN": "随机题头图"
     },
     "description": {
-        "default": "Open Markdown in SiYuan, tested in Windows 11",
-        "zh_CN": "Open Markdown in SiYua, tested in Windows 11n"
+        "default": "随机题头图",
+        "zh_CN": "随机题头图"
     },
     "readme": {
         "default": "README.md"
