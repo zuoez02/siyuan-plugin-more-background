@@ -2,14 +2,14 @@
     "name": "siyuan-plugin-more-background",
     "author": "zuoez02",
     "url": "https://github.com/zuoez02/siyuan-plugin-more-background",
-    "version": "0.2.1",
+    "version": "1.0.0",
     "displayName": {
-        "default": "随机题头图",
-        "zh_CN": "随机题头图"
+        "default": "题头图Plus",
+        "zh_CN": "题头图Plus"
     },
     "description": {
-        "default": "随机题头图",
-        "zh_CN": "随机题头图"
+        "default": "题头图增强插件，支持多个源的随机在线题头图，支持从剪贴板上传",
+        "zh_CN": "题头图增强插件，支持多个源的随机在线题头图，支持从剪贴板上传"
     },
     "readme": {
         "default": "README.md"
