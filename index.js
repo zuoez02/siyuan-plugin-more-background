@@ -21,6 +21,31 @@ module.exports = class MoreBackgroundPlugin extends Plugin {
             if (!background) {
                 return;
             }
+            background.querySelector('.protyle-icon[data-type="remove"]').addEventListener('click', (e) => {
+                this.clear(protyle);
+            });
+
+            // handle url change
+            const mutationObserver = new MutationObserver((mutations) => {
+                mutations.forEach((mutation) => {
+                    if (mutation.type === 'attributes' && mutation.attributeName === 'src') {
+                        const url = mutation.target.getAttribute('src');
+                        if (this.isVideo(url)) {
+                            this.renderVideo(protyle, url);
+                        }
+                    }
+                });
+            });
+
+            mutationObserver.observe(background.querySelector('img'), {
+                attributes: true,
+                attributeFilter: ['src'],
+
+            });
+            const url = protyle.background.element.querySelector('img')?.getAttribute('src');
+            if (url && this.isVideo(url)) {
+                this.renderVideo(protyle, url);
+            }
             background.addEventListener('mouseover', (event) => {
                 let el = event.target;
                 if (!el.classList.contains('protyle-top')) {
@@ -191,6 +216,49 @@ module.exports = class MoreBackgroundPlugin extends Plugin {
         }
     }
 
+    isVideo(url) {
+        const regex = /\.(mp4|webm|ogg|ogv|mov|avi|wmv|flv|mkv|rm|rmvb|3gp|mpg|mpeg|mp4v|mpg4|mpeg4|vob|qt|divx|xvid|f4v|f4p|f4a|f4b)$/g;
+        return regex.test(url);
+    }
+
+    renderVideo(protyle, url) {
+        const u = url;
+        const el = protyle.background.element.querySelector('.protyle-background__img');
+        let video = el.querySelector('video')
+        if (video) {
+            video.remove();
+        }
+        video = document.createElement('video');
+        video.currentTime = 0;
+        video.setAttribute('src', u);
+        video.setAttribute('data-playing', "false");
+        video.setAttribute('autoplay', 'autoplay');
+        video.setAttribute('loop', 'loop');
+        video.setAttribute('muted', 'muted');
+        video.setAttribute('style', 'position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover;');
+        video.classList.add('protyle-background__video');
+        el.appendChild(video);
+        const once = () => {
+            video.play();
+            video.removeEventListener('mouseover', once);
+        }
+        video.addEventListener('mouseover', once);
+        video.addEventListener('click', (e) => {
+            const v = e.target;
+            const playing = v.getAttribute("data-playing")
+            if (playing === "true") {
+                v.pause();
+                v.setAttribute('data-playing', "false");
+            } else {
+                v.play();
+                v.setAttribute('data-playing', "true");
+            }
+        })
+    }
+
+    clear(protyle) {
+        protyle.background.element.querySelector('video').remove();
+    }
 }
 
 function triggerRandomIfNoImg(currentPage) {

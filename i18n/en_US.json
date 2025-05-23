@@ -1,7 +1,8 @@
 {
- "title": "Random Background",
- "loadUrlFailed": "Load image failed",
- "moreBackgroundBtn": "Random Background",
- "uploadFromClipboard": "Upload from clipboard",
- "noImageInClipboard": "No image in clipboard"
+  "title": "Random Background",
+  "loadUrlFailed": "Load image failed",
+  "moreBackgroundBtn": "Random Background",
+  "uploadFromClipboard": "Upload from clipboard",
+  "noImageInClipboard": "No image in clipboard",
+  "reload": "Reload"
 }
