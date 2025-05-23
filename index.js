@@ -230,11 +230,11 @@ module.exports = class MoreBackgroundPlugin extends Plugin {
         }
         video = document.createElement('video');
         video.currentTime = 0;
+        video.muted = true;
+        video.autoplay = true;
+        video.loop = true;
         video.setAttribute('src', u);
         video.setAttribute('data-playing', "false");
-        video.setAttribute('autoplay', 'autoplay');
-        video.setAttribute('loop', 'loop');
-        video.setAttribute('muted', 'muted');
         video.setAttribute('style', 'position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover;');
         video.classList.add('protyle-background__video');
         el.appendChild(video);
