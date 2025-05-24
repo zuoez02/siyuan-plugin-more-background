@@ -1,4 +1,4 @@
-const { Plugin, Menu, showMessage, addIcon } = require('siyuan');
+const { Plugin, Menu, showMessage, getAllEditor } = require('siyuan');
 
 const icon = '<symbol id="icon-more-background" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/symbol" p-id="1928" ><path d="M1024 910.222222V113.777778c0-62.577778-51.2-113.777778-113.777778-113.777778H113.777778C51.2 0 0 51.2 0 113.777778v796.444444c0 62.577778 51.2 113.777778 113.777778 113.777778h796.444444c62.577778 0 113.777778-51.2 113.777778-113.777778zM312.888889 597.333333l142.222222 170.666667 199.111111-256L910.222222 853.333333H113.777778l199.111111-256z" p-id="1929"></path></symbol>';
 
@@ -15,69 +15,82 @@ module.exports = class MoreBackgroundPlugin extends Plugin {
 
         this.addIcons(icon);
 
+        const editors = getAllEditor();
+
+        editors.forEach((editor) => {
+            const protyle = editor.protyle;
+            try {
+                this.initBackgroundPlusOnProtyle(protyle);
+            } catch (e) {
+                console.error(e)
+            }
+        });
+
         this.eventBus.on('loaded-protyle-static', (e) => {
             const protyle = e.detail.protyle;
-            const background = protyle.background.element;
-            if (!background) {
+            try {
+                this.initBackgroundPlusOnProtyle(protyle);
+            } catch (e) {
+                console.error(e)
+            }
+        });
+    }
+
+    initBackgroundPlusOnProtyle(protyle) {
+        const background = protyle.background?.element;
+
+        // handle url change
+        const mutationObserver = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.type === 'attributes' && mutation.attributeName === 'src') {
+                    const url = mutation.target.getAttribute('src');
+                    if (this.isVideo(url)) {
+                        this.renderVideo(protyle, url);
+                    }
+                }
+            });
+        });
+
+        mutationObserver.observe(background.querySelector('img'), {
+            attributes: true,
+            attributeFilter: ['src'],
+
+        });
+        const url = protyle.background.element.querySelector('img')?.getAttribute('src');
+        if (url && this.isVideo(url)) {
+            this.renderVideo(protyle, url);
+        }
+        // cover显示按钮添加保存
+        background.addEventListener('mouseover', (event) => {
+            let el = event.target;
+            if (!el.classList.contains('protyle-top')) {
+                el = el.closest('.protyle-top');
+            }
+            if (!el) {
                 return;
             }
-            background.querySelector('.protyle-icon[data-type="remove"]').addEventListener('click', (e) => {
-                this.clear(protyle);
-            });
-
-            // handle url change
-            const mutationObserver = new MutationObserver((mutations) => {
-                mutations.forEach((mutation) => {
-                    if (mutation.type === 'attributes' && mutation.attributeName === 'src') {
-                        const url = mutation.target.getAttribute('src');
-                        if (this.isVideo(url)) {
-                            this.renderVideo(protyle, url);
-                        }
-                    }
-                });
-            });
-
-            mutationObserver.observe(background.querySelector('img'), {
-                attributes: true,
-                attributeFilter: ['src'],
-
-            });
-            const url = protyle.background.element.querySelector('img')?.getAttribute('src');
-            if (url && this.isVideo(url)) {
-                this.renderVideo(protyle, url);
+            if (!el.querySelector('.protyle-icons') || el.querySelector('.protyle-icons > .more-background-icon')) {
+                return;
             }
-            background.addEventListener('mouseover', (event) => {
-                let el = event.target;
-                if (!el.classList.contains('protyle-top')) {
-                    el = el.closest('.protyle-top');
-                }
-                if (!el) {
-                    return;
-                }
-                if (!el.querySelector('.protyle-icons') || el.querySelector('.protyle-icons > .more-background-icon')) {
-                    return;
-                }
-                const firstIcon = el.querySelector('.protyle-icons > .protyle-icon.ariaLabel');
-                if (!firstIcon) {
-                    return;
-                }
-                const newIcon = document.createElement('span');
-                newIcon.classList.add('protyle-icon');
-                newIcon.classList.add('ariaLabel');
-                newIcon.classList.add('more-background-icon');
-                newIcon.setAttribute('data-link', 'more-background');
-                newIcon.setAttribute('aria-label', this.i18n.moreBackgroundBtn);
-                newIcon.innerHTML = '<svg><use xlink:href="#icon-more-background"></use></svg>';
-                firstIcon.before(newIcon);
-                newIcon.addEventListener('click', (e) => {
-                    this.showThemesMenu(e.target.getBoundingClientRect(), protyle)
-                    e.preventDefault();
-                    e.stopImmediatePropagation();
-                })
+            const firstIcon = el.querySelector('.protyle-icons > .protyle-icon.ariaLabel');
+            if (!firstIcon) {
+                return;
+            }
+
+            const newIcon = document.createElement('span');
+            newIcon.classList.add('protyle-icon');
+            newIcon.classList.add('ariaLabel');
+            newIcon.classList.add('more-background-icon');
+            newIcon.setAttribute('data-link', 'more-background');
+            newIcon.setAttribute('aria-label', this.i18n.moreBackgroundBtn);
+            newIcon.innerHTML = '<svg><use xlink:href="#icon-more-background"></use></svg>';
+            firstIcon.before(newIcon);
+            newIcon.addEventListener('click', (e) => {
+                this.showThemesMenu(e.target.getBoundingClientRect(), protyle)
+                e.preventDefault();
+                e.stopImmediatePropagation();
             })
         })
-
-
     }
 
     async loadStorage() {
@@ -228,6 +241,8 @@ module.exports = class MoreBackgroundPlugin extends Plugin {
         if (video) {
             video.remove();
         }
+        const img = el.querySelector('img');
+
         video = document.createElement('video');
         video.currentTime = 0;
         video.muted = true;
@@ -237,23 +252,38 @@ module.exports = class MoreBackgroundPlugin extends Plugin {
         video.setAttribute('data-playing', "false");
         video.setAttribute('style', 'position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover;');
         video.classList.add('protyle-background__video');
-        el.appendChild(video);
-        const once = () => {
-            video.play();
-            video.removeEventListener('mouseover', once);
+        const objectPosition = img.style.objectPosition;
+        if (objectPosition) {
+            video.style.objectPosition = objectPosition;
         }
-        video.addEventListener('mouseover', once);
-        video.addEventListener('click', (e) => {
-            const v = e.target;
-            const playing = v.getAttribute("data-playing")
-            if (playing === "true") {
-                v.pause();
-                v.setAttribute('data-playing', "false");
-            } else {
-                v.play();
-                v.setAttribute('data-playing', "true");
+        el.appendChild(video);
+        video.addEventListener("mousedown", (event) => {
+            event.preventDefault();
+            if (!video.parentElement.querySelector(".protyle-icons").classList.contains("fn__none")) {
+                return;
             }
-        })
+            const y = event.clientY;
+            const height = video.videoHeight * video.clientWidth / video.videoWidth - video.clientHeight;
+            let originalPositionY = parseFloat(video.style.objectPosition.substring(7)) || 50;
+            if (video.style.objectPosition.endsWith("px")) {
+                originalPositionY = -parseInt(video.style.objectPosition.substring(7)) / height * 100;
+            }
+            document.onmousemove = (moveEvent) => {
+                video.style.objectPosition = `center ${((y - moveEvent.clientY) / height * 100 + originalPositionY).toFixed(2)}%`;
+                img.style.objectPosition = `center ${((y - moveEvent.clientY) / height * 100 + originalPositionY).toFixed(2)}%`;
+                event.preventDefault();
+            };
+
+            document.onmouseup = () => {
+                document.onmousemove = null;
+                document.onmouseup = null;
+                document.ondragstart = null;
+                document.onselectstart = null;
+                document.onselect = null;
+            };
+        });
+
+
     }
 
     clear(protyle) {

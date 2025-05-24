@@ -1,3 +1,7 @@
 .protyle-background__img {
     position: relative;
 }
+
+.protyle-background__img img[style="cursor: move;"]~video {
+    cursor: move;
+}
