@@ -1,8 +1,22 @@
 {
-  "title": "Random Background",
-  "loadUrlFailed": "Load image failed",
-  "moreBackgroundBtn": "Random Background",
+  "title": "Random Header Image",
+  "loadUrlFailed": "Failed to load image",
+  "moreBackgroundBtn": "Random Header Image",
   "uploadFromClipboard": "Upload from clipboard",
   "noImageInClipboard": "No image in clipboard",
-  "reload": "Reload"
+  "loadFromAssets": "Random from assets directory",
+  "reload": "Reload",
+  "descriptionTitle": "Declaration",
+  "supportImageSize": "Only Unsplash and Picsum support image size settings",
+  "widthTitle": "Image width",
+  "heightTitle": "Image height",
+  "readFromAssets": "Randomly read files from assets directory",
+  "writeToAssets": "Save random header image to assets directory",
+  "assetsLocation": "Header Image Assets Directory",
+  "assetsLocationDesc": "This configuration is the path under the workspace/data directory, e.g.: /assets, /public, etc.",
+  "resetBtn": "Reset",
+  "readAssetsError": "Assets directory loading failed, please check configuration or console error messages",
+  "emptyAssets": "Directory is empty or does not exist",
+  "openSetting": "Open settings",
+  "writeImgToAssetsFaild": "Failed to write file"
 }

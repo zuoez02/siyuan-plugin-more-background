@@ -4,5 +4,19 @@
   "moreBackgroundBtn": "随机题头图",
   "uploadFromClipboard": "从剪贴板上传",
   "noImageInClipboard": "剪贴板中无图片",
-  "reload": "重新加载"
+  "loadFromAssets": "从资源目录随机",
+  "reload": "重新加载",
+  "descriptionTitle": "声明",
+  "supportImageSize": "仅Unsplash和Picsum支持图片大小设置",
+  "widthTitle": "图片宽度",
+  "heightTitle": "图片高度",
+  "readFromAssets": "从资源目录随机读取文件",
+  "writeToAssets": "保存随记题头图到资源目录",
+  "assetsLocation": "题头图资源目录",
+  "assetsLocationDesc": "此配置为工作空间/data目录下的路径, 例如: /assets, /public等",
+  "resetBtn": "重置",
+  "readAssetsError": "资源目录加载失败，请检查配置或控制台错误信息",
+  "emptyAssets": "目录是空的或不存在",
+  "openSetting": "打开设置",
+  "writeImgToAssetsFaild": "写入文件错误"
 }
