@@ -176,7 +176,6 @@ module.exports = class MoreBackgroundPlugin extends Plugin {
 
     initBackgroundPlusOnProtyle(protyle) {
         const background = protyle.background?.element;
-
         // handle url change
         const mutationObserver = new MutationObserver((mutations) => {
             mutations.forEach((mutation) => {
@@ -198,6 +197,10 @@ module.exports = class MoreBackgroundPlugin extends Plugin {
         if (url && this.isVideo(url)) {
             this.renderVideo(protyle, url);
         }
+        // database gallery
+        const wysiwyg = protyle.wysiwyg?.element;
+        observeAndReplaceVideoImgs(wysiwyg)
+
         // cover显示按钮添加保存
         background.addEventListener('mouseover', (event) => {
             let el = event.target;
@@ -607,4 +610,89 @@ async function detectImageTypeAndName(blob) {
         case '0000000C': return { type: 'image/avif', name: generateTimeId() + '.avif' };    // AVIF
         default: return { type: 'application/octet-stream', name: generateTimeId }; // 未知类型
     }
+}
+
+/**
+ * AI generate
+ */
+/**
+ * 检查给定的 src 是否是视频（基于常见视频扩展名）
+ * @param {string} src
+ * @returns {boolean}
+ */
+function isVideoSrc(src) {
+    if (!src) return false;
+    const videoExtensions = ['.mp4', '.webm', '.ogg', '.mov', '.avi', '.mkv'];
+    return videoExtensions.some(ext => src.toLowerCase().endsWith(ext));
+}
+
+/**
+ * 替换 <img> 为 <video> 标签
+ * @param {HTMLImageElement} imgElement
+ */
+function replaceImgWithVideo(imgElement) {
+    const src = imgElement.src;
+    if (!isVideoSrc(src)) return; // 如果不是视频，不处理
+
+    const videoElement = document.createElement('video');
+    videoElement.src = src;
+    videoElement.controls = false; // 添加播放控件
+    videoElement.style.width = imgElement.style.width || '100%'; // 保持原有样式
+    videoElement.style.height = imgElement.style.height || 'auto';
+    videoElement.currentTime = 0;
+    videoElement.muted = false;
+    videoElement.autoplay = false;
+    videoElement.loop = true;
+    videoElement.setAttribute('data-playing', "false");
+    videoElement.setAttribute('style', 'position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover;');
+
+    videoElement.addEventListener('click', () => {
+        if (videoElement.getAttribute('data-playing') === 'true') {
+            videoElement.pause();
+            videoElement.setAttribute('data-playing', 'false');
+        } else {
+            videoElement.setAttribute('data-playing', 'true');
+            videoElement.play();
+        }
+    })
+
+    // 替换原来的 <img> 为 <video>
+    imgElement.parentNode?.replaceChild(videoElement, imgElement);
+}
+
+/**
+ * 初始化 MutationObserver 监听子元素变化
+ * @param {HTMLElement} targetElement
+ */
+function observeAndReplaceVideoImgs(targetElement) {
+    const observer = new MutationObserver((mutationsList) => {
+        for (const mutation of mutationsList) {
+            if (mutation.type === 'childList') {
+                // 检查新增的节点
+                mutation.addedNodes.forEach((node) => {
+                    if (node.nodeType === Node.ELEMENT_NODE) {
+                        // 检查当前节点是否是 <img>
+                        if (node.tagName === 'IMG') {
+                            replaceImgWithVideo(node);
+                        }
+                        // 递归检查所有子节点（防止动态插入的容器中包含 <img>）
+                        const imgElements = node.querySelectorAll?.('img') || [];
+                        imgElements.forEach(replaceImgWithVideo);
+                    }
+                });
+            }
+        }
+    });
+
+    // 监听子节点变化（包括新增、删除）
+    observer.observe(targetElement, {
+        childList: true,  // 监听子节点增删
+        subtree: true,    // 递归监听所有后代节点
+    });
+
+    // 初始检查（处理已存在的 <img>）
+    const existingImgs = targetElement.querySelectorAll('img');
+    existingImgs.forEach(replaceImgWithVideo);
+
+    return observer; // 返回 observer，方便后续 disconnect()
 }
