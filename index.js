@@ -176,6 +176,10 @@ module.exports = class MoreBackgroundPlugin extends Plugin {
 
     initBackgroundPlusOnProtyle(protyle) {
         const background = protyle.background?.element;
+        if (!background) {
+            console.warn("background element not found in", protyle);
+            return;
+        }
         // handle url change
         const mutationObserver = new MutationObserver((mutations) => {
             mutations.forEach((mutation) => {
@@ -241,7 +245,7 @@ module.exports = class MoreBackgroundPlugin extends Plugin {
         } else {
             const obj = typeof data === 'string' ? JSON.parse(data) : data;
             if (Array.isArray(obj)) {
-                this.data[STORAGE_NAME].types = this.data[STORAGE_NAME].concat(types);
+                this.data[STORAGE_NAME].types = this.data[STORAGE_NAME].concat(obj);
                 await this.saveStorage();
             } else {
                 Object.assign(this.data[STORAGE_NAME], obj)
